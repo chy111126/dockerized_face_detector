@@ -1,63 +1,28 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, render_template
-from werkzeug.utils import secure_filename
-import uuid
+from flask import Flask, request, redirect, url_for, render_template
+from flask import jsonify
+from flask_cors import CORS
+import requests
+from flask import Response
+from flask import stream_with_context
 
-UPLOAD_FOLDER = './uploads'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__, template_folder='.')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SECRET_KEY'] = 'super secret key'
+CORS(app)
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def create_image_folder():
-    """
-    Creates folders for face-extracted image
-    :return:
-    """
-    img_uid = str(uuid.uuid4().hex)
-    img_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], img_uid)
-    face_output_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], img_uid, "output")
-
-    if not os.path.exists(img_folder_path):
-        os.mkdir(img_folder_path)
-
-    if not os.path.exists(face_output_folder_path):
-        os.mkdir(face_output_folder_path)
-
-    return img_uid, img_folder_path, face_output_folder_path
-
-
-@app.route('/extract', methods=['POST'])
+@app.route('/extract', methods=['GET', 'POST'])
 def extract_face_from_image():
     """
-    From
+    Routes to internal service endpoint
     :return:
     """
     if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_ext = filename.rsplit('.', 1)[1].lower()
-            img_uid, img_folder_path, face_output_folder_path = create_image_folder()
-
-            file.save(os.path.join(img_folder_path, 'image.' + file_ext))
-            return redirect(url_for('upload_file',
-                                    filename=img_uid))
+        #print(request.get_json())
+        #print(request.form['image_data'])
+        r = requests.post('http://127.0.0.1:5051/extract', data=request.get_json())
+        return Response(stream_with_context(r.iter_content()), content_type = r.headers['content-type'])
 
 
 @app.route('/', methods=['GET'])
@@ -68,4 +33,4 @@ def index():
     """
     return render_template('index.html')
 
-app.run()
+app.run(debug=True)

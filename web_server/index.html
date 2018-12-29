@@ -70,6 +70,10 @@
 								</div>
 						</div>
 				</div>
+				<!-- Morphed images -->
+				<h4>Morphed images:</h4>
+				<div id="face_morpher_image_morphed">
+				</div>
 			</div>
 			
 
@@ -79,6 +83,18 @@
 	<script src="static/js/jquery-3.3.1.js"></script>
 
 	<script>
+
+		// Convert image file to display-able format
+		function convertFile(file) {
+			return new Promise((resolve,reject)=>{
+				let reader = new FileReader()
+				reader.onload = () => { resolve(reader.result) }
+				reader.onerror = () => { reject(reader.error) }
+				reader.readAsDataURL(file)
+			})
+		}
+
+		// For rendering response object of base64 image
 		function get_base64_image_from_response(rep) {
 			img_b = rep.substring(2)
 			img_b = img_b.substring(0, img_b.length-1)
@@ -122,16 +138,6 @@
 			}
 		}
 
-		// Convert image file to display-able format
-		function convertFile(file) {
-			return new Promise((resolve,reject)=>{
-				let reader = new FileReader()
-				reader.onload = () => { resolve(reader.result) }
-				reader.onerror = () => { reject(reader.error) }
-				reader.readAsDataURL(file)
-			})
-		}
-
 		// Preview image for face detector
 		function showPreviewImage(src, fileName) {
 			let image = new Image(250)
@@ -144,19 +150,34 @@
 			e.preventDefault()
 		})
 
-		showWithinBroserFile = function( file, preview_div_query )
+		showWithinBroserFileAndSubmit = function( file, preview_div_query )
 		{
-			console.log(file)
-			
-			// Show the image within browser
-			let image = new Image(45)
-			image.src = file
-			$(preview_div_query).append(image)
+			// Submit to webservice
+			$.ajax({
+				url: "http://127.0.0.1:5052/morph",
+				dataType: "json",
+				contentType: "application/json; charset=utf-8",
+				data: "{\"face1_data\":\"" + face1_data + "\", \"face2_data\":\"" + face2_data + "\"}",
+				type: "post",
+				cache: false,
+				success: function (msg) {
+					$("#face_morpher_image_morphed").empty()
 
+					// Append morphed images
+					faces = msg['interpol_faces']
+					for (i=0; i < faces.length; i++) {
+						img_b = get_base64_image_from_response(faces[i])
+
+						let image = new Image(45)
+						image.src = img_b
+						$("#face_morpher_image_morphed").append(image)
+					}
+				}
+			});
 		};
 
 		// onDrop event handling for all image-dropping areas
-		function get_dropped_image(e, preview_div_query) {
+		function get_dropped_image_for_face_extractor(e, preview_div_query) {
 			e.stopPropagation()
 			e.preventDefault()
 
@@ -178,16 +199,77 @@
 			}
 		}
 
+		function get_dropped_image_for_face_morpher(e, face_data_num, preview_div_query) {
+			e.stopPropagation()
+			e.preventDefault()
+
+			//console.dir(files)
+
+			// Reset preview area
+			$(preview_div_query).empty()
+			//previewFiles(files)
+
+			// Decide if dropped image is from local files or within-webpage image
+			droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
+			imageWithinBrowser = e.originalEvent.dataTransfer.getData('text/plain');
+			if(droppedFiles.length == 0 && imageWithinBrowser != null) {
+				if (face_data_num == 1) {
+					face1_data = imageWithinBrowser;
+
+				} else if (face_data_num == 2) {
+					face2_data = imageWithinBrowser;
+				}
+				if (face1_data != null && face2_data != null) {
+					showWithinBroserFileAndSubmit(imageWithinBrowser, preview_div_query);
+				}
+					
+				// Show the image within browser
+				let image = new Image(45)
+				image.src = imageWithinBrowser
+				$(preview_div_query).append(image)
+			} else {
+				e.originalEvent.dataTransfer.getData("image/*")
+				let files = e.originalEvent.dataTransfer.files
+				
+				// Use convert file function and store the base64 image
+				if (files && files.length >= 1) {
+					$.map(files, file => {
+						convertFile(file)
+							.then(data => {
+								if (face_data_num == 1) {
+									face1_data = data;
+
+								} else if (face_data_num == 2) {
+									face2_data = data;
+								}
+								if (face1_data != null && face2_data != null) {
+									showWithinBroserFileAndSubmit(imageWithinBrowser, preview_div_query);
+								}
+					
+								// Show the image within browser
+								let image = new Image(45)
+								image.src = data
+								$(preview_div_query).append(image)
+							})
+							.catch(err => console.log(err))
+					})
+				}
+			}
+		}
+
+		face1_data = null;
+		face2_data = null;
+
 		$("#face_extractor_image").on("drop", function(e){
-			get_dropped_image(e, "#face_extractor_image_preview");
+			get_dropped_image_for_face_extractor(e, "#face_extractor_image_preview");
 		})
 
 		$("#face_morpher_face_1").on("drop", function(e){
-			get_dropped_image(e, "#face_morpher_face_1");
+			get_dropped_image_for_face_morpher(e, 1, "#face_morpher_face_1");
 		})
 
 		$("#face_morpher_face_2").on("drop", function(e){
-			get_dropped_image(e, "#face_morpher_face_2");
+			get_dropped_image_for_face_morpher(e, 2, "#face_morpher_face_2");
 		})
 
 	</script>

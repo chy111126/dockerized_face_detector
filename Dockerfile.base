@@ -1,0 +1,16 @@
+# To build, run "docker build -t dockerized_face_detector:base . -f Dockerfile.base"
+
+from floydhub/dl-docker:cpu
+
+MAINTAINER tom.chau@oocl.com
+
+# Install updated dependencies for the services
+RUN pip install opencv-python && \
+    pip install --upgrade pillow && \
+    pip install --upgrade pip && \
+    pip install tensorlayer --ignore-installed scipy && \
+    pip install --upgrade tensorflow && \
+    pip install flask flask-cors
+
+WORKDIR "/root"
+CMD ["/bin/bash"]

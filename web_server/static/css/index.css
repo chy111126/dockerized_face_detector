@@ -1,0 +1,36 @@
+body
+{
+    font-family: Roboto, sans-serif;
+    color: #0f3c4b;
+    background-color: #e5edf1;
+    height: 100%;
+}
+
+.flex 
+{
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;  /*or use calc(100vh - header_height)*/
+}
+
+.img_upload_area
+{
+    width:100%;
+    border-style:dashed;
+    border-width:0.2em;
+    min-height: 200px;
+    position: relative;
+}
+
+.img_upload_area img {
+    max-height: 200px;  
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+}
+
+h4 {
+    margin:20px auto 10px;
+}

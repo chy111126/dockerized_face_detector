@@ -15,7 +15,9 @@ def morph_faces():
     :return:
     """
 
-    input_json = request.get_json()
+    #input_json = request.get_json()
+    input_json = request.form
+    
     face1_src_base64_img = input_json['face1_data']
     face2_src_base64_img = input_json['face2_data']
     
@@ -24,4 +26,4 @@ def morph_faces():
     return jsonify(return_dict)
 
 
-app.run(debug=True, port=5052)
+app.run(port=5052)

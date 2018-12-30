@@ -15,11 +15,12 @@ def extract_face_from_image():
     """    
     fe = FaceExtractor()
 
-    input_json = request.get_json()
+    #input_json = request.get_json()
+    input_json = request.form
     src_base64_img = input_json['image_data']
     
     return_dict = fe.detect_faces(src_base64_img)
 
     return jsonify(return_dict)
 
-app.run(debug=True, port=5051)
+app.run(port=5051)

@@ -56,7 +56,7 @@
 						<div class="box">
 								<div id="face_morpher_face_1" class="img_upload_area">
 									<div id="face_extractor_image_preview">
-										<img src='static/img/placeholder.png' style="width: 40px"/>
+										<img src='static/img/placeholder.png' style="width: 64px"/>
 									</div>
 								</div>
 						</div>
@@ -65,7 +65,7 @@
 						<div class="box">
 								<div id="face_morpher_face_2" class="img_upload_area">
 									<div id="face_extractor_image_preview">
-											<img src='static/img/placeholder.png' style="width: 40px"/>
+											<img src='static/img/placeholder.png' style="width: 64px"/>
 									</div>
 								</div>
 						</div>
@@ -96,8 +96,9 @@
 
 		// For rendering response object of base64 image
 		function get_base64_image_from_response(rep) {
-			img_b = rep.substring(2)
-			img_b = img_b.substring(0, img_b.length-1)
+			img_b = rep
+			//img_b = rep.substring(2)
+			//img_b = img_b.substring(0, img_b.length-1)
 			img_b = "data:image/jpeg;base64," + img_b
 			return img_b
 		}
@@ -127,7 +128,7 @@
 									for (i=0; i < faces.length; i++) {
 										img_b = get_base64_image_from_response(faces[i])
 
-										let image = new Image(45)
+										let image = new Image(64)
 										image.src = img_b
 										$("#face_extractor_image_extracted").append(image)
 									}
@@ -169,7 +170,7 @@
 					for (i=0; i < faces.length; i++) {
 						img_b = get_base64_image_from_response(faces[i])
 
-						let image = new Image(45)
+						let image = new Image(64)
 						image.src = img_b
 						$("#face_morpher_image_morphed").append(image)
 					}
@@ -225,7 +226,7 @@
 				}
 					
 				// Show the image within browser
-				let image = new Image(45)
+				let image = new Image(64)
 				image.src = imageWithinBrowser
 				$(preview_div_query).append(image)
 			} else {
@@ -248,7 +249,7 @@
 								}
 					
 								// Show the image within browser
-								let image = new Image(45)
+								let image = new Image(64)
 								image.src = data
 								$(preview_div_query).append(image)
 							})

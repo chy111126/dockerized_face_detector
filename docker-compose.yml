@@ -1,0 +1,18 @@
+version: '3'
+services:
+  web_server:
+    image: "dockerized_face_detector:web_server"
+    environment:
+      - IS_DOCKER=1
+      - FACE_EXTRACTOR_SERVICE_ENDPOINT=http://host.docker.internal:5051/extract
+      - FACE_MORPHER_SERVICE_ENDPOINT=http://host.docker.internal:5052/morph
+    ports:
+     - "5000:5000"
+  face_extractor_service:
+    image: "dockerized_face_detector:face_extractor_service"
+    ports:
+     - "5051:5051"
+  face_morpher_service:
+    image: "dockerized_face_detector:face_morpher_service"
+    ports:
+     - "5052:5052"

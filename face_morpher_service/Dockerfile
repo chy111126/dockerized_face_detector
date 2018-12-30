@@ -6,4 +6,4 @@ MAINTAINER tom.chau@oocl.com
 
 ADD . /root/code
 WORKDIR "/root/code"
-CMD ["python", "face_morpher.py"]
+CMD ["python", "server.py"]

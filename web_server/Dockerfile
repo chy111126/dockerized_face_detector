@@ -1,4 +1,4 @@
-# To build, run "docker build -t dockerized_face_detector:face_extractor_service ."
+# To build, run "docker build -t dockerized_face_detector:web_server ."
 
 from dockerized_face_detector:base
 
